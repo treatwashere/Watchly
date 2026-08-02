@@ -1,167 +1,27 @@
 /**
- * Watchly - Frontend Interactive Engine
- * Handles searching, platform filtering, tab switching, modal updates, 
- * and live-counter ticking simulations.
+ * Watchly - Real Live API Integration Engine
+ * Connects directly to YouTube Data API v3 and Twitch Helix API
  */
 
+// --- CONFIGURATION: Put your free API keys here ---
+const CONFIG = {
+  YOUTUBE_API_KEY: "AIzaSyAFWozW88koPZrIYcrEVrXTQ9DOXhac_W0",
+  TWITCH_CLIENT_ID: "q02p4wvk8q89yu76ajg84v9ngqm2wd",
+  TWITCH_ACCESS_TOKEN: "qi0rhcdxq4gy3106kh8ibalj39ezpq" // App Access Token
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-
-  // --- Mock Data ---
-  const channelsData = [
-    {
-      id: 'kaicenat',
-      name: 'Kai Cenat',
-      handle: '@kaicenat',
-      platform: 'twitch',
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150',
-      count: 10485210,
-      metricLabel: 'LIVE FOLLOWER COUNT',
-      views: '184.2M',
-      isLive: true,
-      category: 'Just Chatting',
-      url: 'https://twitch.tv/kaicenat'
-    },
-    {
-      id: 'mrbeast',
-      name: 'MrBeast',
-      handle: '@MrBeast',
-      platform: 'youtube',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-      count: 310490120,
-      metricLabel: 'LIVE SUBSCRIBER COUNT',
-      views: '58.4B',
-      isLive: false,
-      category: 'Entertainment',
-      url: 'https://youtube.com/@MrBeast'
-    },
-    {
-      id: 'xqc',
-      name: 'xQc',
-      handle: '@xqc',
-      platform: 'twitch',
-      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150',
-      count: 11982400,
-      metricLabel: 'LIVE FOLLOWER COUNT',
-      views: '520.1M',
-      isLive: true,
-      category: 'Grand Theft Auto V',
-      url: 'https://twitch.tv/xqc'
-    },
-    {
-      id: 'mkbhd',
-      name: 'Marques Brownlee',
-      handle: '@MKBHD',
-      platform: 'youtube',
-      avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150',
-      count: 18902300,
-      metricLabel: 'LIVE SUBSCRIBER COUNT',
-      views: '4.1B',
-      isLive: false,
-      category: 'Science & Technology',
-      url: 'https://youtube.com/@MKBHD'
-    },
-    {
-      id: 'pokimane',
-      name: 'Pokimane',
-      handle: '@pokimane',
-      platform: 'twitch',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      count: 9340120,
-      metricLabel: 'LIVE FOLLOWER COUNT',
-      views: '210.5M',
-      isLive: true,
-      category: 'VALORANT',
-      url: 'https://twitch.tv/pokimane'
-    },
-    {
-      id: 'pyro',
-      name: 'Lofi Girl',
-      handle: '@LofiGirl',
-      platform: 'youtube',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      count: 14200000,
-      metricLabel: 'LIVE SUBSCRIBER COUNT',
-      views: '1.9B',
-      isLive: true,
-      category: 'Music',
-      url: 'https://youtube.com/@LofiGirl'
-    }
-  ];
-
-  const streamsData = [
-    {
-      id: 'stream-1',
-      channelId: 'kaicenat',
-      channelName: 'Kai Cenat',
-      platform: 'twitch',
-      title: 'MAFIA STREAM DAY 3! SPECIAL GUESTS IN THE BUILDING!',
-      viewers: '84,120',
-      game: 'Just Chatting',
-      thumb: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500',
-      url: 'https://twitch.tv/kaicenat'
-    },
-    {
-      id: 'stream-2',
-      channelId: 'xqc',
-      channelName: 'xQc',
-      platform: 'twitch',
-      title: 'JUICER GAMING! RANK 1 RADIANT CLIMB THEN REACTION TIME',
-      viewers: '62,490',
-      game: 'VALORANT',
-      thumb: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500',
-      url: 'https://twitch.tv/xqc'
-    },
-    {
-      id: 'stream-3',
-      channelId: 'pyro',
-      channelName: 'Lofi Girl',
-      platform: 'youtube',
-      title: 'lofi hip hop radio 📚 - beats to relax/study to',
-      viewers: '31,800',
-      game: 'Music',
-      thumb: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500',
-      url: 'https://youtube.com/@LofiGirl'
-    }
-  ];
-
-  const clipsData = [
-    {
-      id: 'clip-1',
-      title: '$1,000,000 Hotel vs $1 Hotel Highlight!',
-      channelName: 'MrBeast',
-      platform: 'youtube',
-      views: '12.4M views',
-      duration: '0:58',
-      thumb: 'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=500',
-      url: 'https://youtube.com/@MrBeast'
-    },
-    {
-      id: 'clip-2',
-      title: 'Unbelievable clutch in final circle!',
-      channelName: 'Pokimane',
-      platform: 'twitch',
-      views: '842K views',
-      duration: '0:30',
-      thumb: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=500',
-      url: 'https://twitch.tv/pokimane'
-    },
-    {
-      id: 'clip-3',
-      title: 'Apple Vision Pro Secret Feature Revealed',
-      channelName: 'Marques Brownlee',
-      platform: 'youtube',
-      views: '3.1M views',
-      duration: '1:45',
-      thumb: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=500',
-      url: 'https://youtube.com/@MKBHD'
-    }
-  ];
 
   // --- State Variables ---
   let selectedPlatform = 'all'; // 'all' | 'twitch' | 'youtube'
   let searchQuery = '';
   let activeTab = 'live-counts';
-  let activeModalChannel = null;
+  let livePollingInterval = null;
+
+  // Real fetched state
+  let channelsData = [];
+  let streamsData = [];
+  let clipsData = [];
 
   // --- DOM Elements ---
   const searchInput = document.getElementById('searchInput');
@@ -195,11 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalPlatformText = document.getElementById('modalPlatformText');
   const modalExternalLink = document.getElementById('modalExternalLink');
 
-  // --- Initialization ---
+  // Initialize Application
+  init();
+
   function init() {
     setupEventListeners();
-    renderAllGrids();
-    startLiveTicker();
+    
+    // Initial default search to populate real live data
+    performSearch("MrBeast");
+    performSearch("kaicenat");
   }
 
   // --- Event Listeners ---
@@ -226,11 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Search Input
+    // Real-Time Search Handler (Debounce & Submit)
+    let searchTimeout = null;
     searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value.trim().toLowerCase();
+      searchQuery = e.target.value.trim();
       clearSearchBtn.classList.toggle('hidden', searchQuery === '');
-      renderAllGrids();
+
+      clearTimeout(searchTimeout);
+      if (searchQuery.length > 2) {
+        searchTimeout = setTimeout(() => {
+          performSearch(searchQuery);
+        }, 600); // Fetch from live API after typing stops
+      }
     });
 
     clearSearchBtn.addEventListener('click', () => {
@@ -240,28 +111,220 @@ document.addEventListener('DOMContentLoaded', () => {
       renderAllGrids();
     });
 
-    // Modal Close Events
+    // Modal Events
     closeModalBtn.addEventListener('click', closeModal);
     counterModal.addEventListener('click', (e) => {
       if (e.target === counterModal) closeModal();
     });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-    });
   }
 
-  // --- Filtering Helpers ---
-  function filterByPlatformAndSearch(items, nameKey = 'name') {
-    return items.filter(item => {
-      const matchesPlatform = selectedPlatform === 'all' || item.platform === selectedPlatform;
-      const matchesSearch = searchQuery === '' || 
-        item[nameKey].toLowerCase().includes(searchQuery) || 
-        (item.handle && item.handle.toLowerCase().includes(searchQuery));
-      return matchesPlatform && matchesSearch;
-    });
+  // ==========================================
+  // 🛰️ REAL API FETCHING LOGIC
+  // ==========================================
+
+  async function performSearch(query) {
+    if (selectedPlatform === 'all' || selectedPlatform === 'youtube') {
+      fetchYouTubeChannel(query);
+    }
+    if (selectedPlatform === 'all' || selectedPlatform === 'twitch') {
+      fetchTwitchChannel(query);
+    }
   }
 
-  // --- Render Functions ---
+  // --- 1. REAL YOUTUBE DATA API V3 ---
+  async function fetchYouTubeChannel(query) {
+    if (!CONFIG.YOUTUBE_API_KEY || CONFIG.YOUTUBE_API_KEY.includes("YOUR_")) {
+      console.warn("Watchly: YouTube API Key missing in CONFIG.");
+      return;
+    }
+
+    try {
+      // Step A: Search for Channel ID
+      const searchRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&key=${CONFIG.YOUTUBE_API_KEY}`
+      );
+      const searchData = await searchRes.json();
+      if (!searchData.items || searchData.items.length === 0) return;
+
+      const channelId = searchData.items[0].id.channelId;
+
+      // Step B: Get Real Statistics & Details
+      const detailsRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&id=${channelId}&key=${CONFIG.YOUTUBE_API_KEY}`
+      );
+      const detailsData = await detailsRes.json();
+      const channel = detailsData.items[0];
+
+      // Format Channel Object
+      const formattedChannel = {
+        id: `yt-${channel.id}`,
+        rawId: channel.id,
+        name: channel.snippet.title,
+        handle: channel.snippet.customUrl || `@${channel.snippet.title.replace(/\s+/g, '')}`,
+        platform: 'youtube',
+        avatar: channel.snippet.thumbnails.high.url,
+        count: parseInt(channel.statistics.subscriberCount) || 0,
+        metricLabel: 'LIVE SUBSCRIBER COUNT',
+        views: formatNumber(channel.statistics.viewCount),
+        isLive: false,
+        url: `https://youtube.com/channel/${channel.id}`
+      };
+
+      upsertChannel(formattedChannel);
+      fetchYouTubeVideosAndStreams(channel.id);
+    } catch (err) {
+      console.error("YouTube API Error:", err);
+    }
+  }
+
+  async function fetchYouTubeVideosAndStreams(channelId) {
+    try {
+      // Fetch Recent Videos / Streams
+      const res = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=4&key=${CONFIG.YOUTUBE_API_KEY}`
+      );
+      const data = await res.json();
+
+      if (data.items) {
+        data.items.forEach(item => {
+          const isLiveBroadcast = item.snippet.liveBroadcastContent === 'live';
+          
+          if (isLiveBroadcast) {
+            streamsData.push({
+              id: item.id.videoId,
+              channelName: item.snippet.channelTitle,
+              platform: 'youtube',
+              title: item.snippet.title,
+              viewers: 'LIVE',
+              game: 'YouTube Live',
+              thumb: item.snippet.thumbnails.high.url,
+              url: `https://youtube.com/watch?v=${item.id.videoId}`
+            });
+          } else {
+            clipsData.push({
+              id: item.id.videoId,
+              title: item.snippet.title,
+              channelName: item.snippet.channelTitle,
+              platform: 'youtube',
+              views: 'Recent Upload',
+              duration: 'Video',
+              thumb: item.snippet.thumbnails.high.url,
+              url: `https://youtube.com/watch?v=${item.id.videoId}`
+            });
+          }
+        });
+        renderAllGrids();
+      }
+    } catch (err) {
+      console.error("YouTube Content Fetch Error:", err);
+    }
+  }
+
+  // --- 2. REAL TWITCH HELIX API ---
+  async function fetchTwitchChannel(username) {
+    if (!CONFIG.TWITCH_CLIENT_ID || CONFIG.TWITCH_CLIENT_ID.includes("YOUR_")) {
+      console.warn("Watchly: Twitch API Credentials missing in CONFIG.");
+      return;
+    }
+
+    const headers = {
+      'Client-ID': CONFIG.TWITCH_CLIENT_ID,
+      'Authorization': `Bearer ${CONFIG.TWITCH_ACCESS_TOKEN}`
+    };
+
+    try {
+      // Step A: Get Twitch User Profile
+      const userRes = await fetch(`https://api.twitch.tv/helix/users?login=${encodeURIComponent(username.toLowerCase())}`, { headers });
+      const userData = await userRes.json();
+      if (!userData.data || userData.data.length === 0) return;
+
+      const user = userData.data[0];
+
+      // Step B: Get Real Live Follower Count
+      const followRes = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${user.id}`, { headers });
+      const followData = await followRes.json();
+      const totalFollowers = followData.total || 0;
+
+      // Step C: Check if currently live
+      const streamRes = await fetch(`https://api.twitch.tv/helix/streams?user_id=${user.id}`, { headers });
+      const streamData = await streamRes.json();
+      const isLive = streamData.data && streamData.data.length > 0;
+      const liveStream = isLive ? streamData.data[0] : null;
+
+      const formattedChannel = {
+        id: `tw-${user.id}`,
+        rawId: user.id,
+        name: user.display_name,
+        handle: `@${user.login}`,
+        platform: 'twitch',
+        avatar: user.profile_image_url,
+        count: totalFollowers,
+        metricLabel: 'LIVE FOLLOWER COUNT',
+        views: formatNumber(user.view_count || 0),
+        isLive: isLive,
+        category: liveStream ? liveStream.game_name : 'Offline',
+        url: `https://twitch.tv/${user.login}`
+      };
+
+      upsertChannel(formattedChannel);
+
+      if (isLive) {
+        streamsData.push({
+          id: liveStream.id,
+          channelName: user.display_name,
+          platform: 'twitch',
+          title: liveStream.title,
+          viewers: liveStream.viewer_count.toLocaleString(),
+          game: liveStream.game_name,
+          thumb: liveStream.thumbnail_url.replace('{width}', '640').replace('{height}', '360'),
+          url: `https://twitch.tv/${user.login}`
+        });
+      }
+
+      fetchTwitchClips(user.id, headers);
+
+    } catch (err) {
+      console.error("Twitch API Error:", err);
+    }
+  }
+
+  async function fetchTwitchClips(broadcasterId, headers) {
+    try {
+      const res = await fetch(`https://api.twitch.tv/helix/clips?broadcaster_id=${broadcasterId}&first=4`, { headers });
+      const data = await res.json();
+
+      if (data.data) {
+        data.data.forEach(clip => {
+          clipsData.push({
+            id: clip.id,
+            title: clip.title,
+            channelName: clip.broadcaster_name,
+            platform: 'twitch',
+            views: `${formatNumber(clip.view_count)} views`,
+            duration: `${Math.round(clip.duration)}s`,
+            thumb: clip.thumbnail_url,
+            url: clip.url
+          });
+        });
+        renderAllGrids();
+      }
+    } catch (err) {
+      console.error("Twitch Clips Error:", err);
+    }
+  }
+
+  // --- Helper to Insert or Update Channels Array ---
+  function upsertChannel(channelObj) {
+    const index = channelsData.findIndex(c => c.id === channelObj.id);
+    if (index >= 0) {
+      channelsData[index] = channelObj;
+    } else {
+      channelsData.unshift(channelObj);
+    }
+    renderAllGrids();
+  }
+
+  // --- Render Grids to UI ---
   function renderAllGrids() {
     renderCounters();
     renderStreams();
@@ -270,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCounters() {
-    const filtered = filterByPlatformAndSearch(channelsData);
+    const filtered = filterData(channelsData);
     countersGrid.innerHTML = filtered.map(ch => `
       <div class="card" data-channel-id="${ch.id}">
         <div class="counter-card-inner">
@@ -294,17 +357,13 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `).join('');
 
-    // Attach Click Event to Counter Cards
     countersGrid.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.getAttribute('data-channel-id');
-        openModal(id);
-      });
+      card.addEventListener('click', () => openModal(card.getAttribute('data-channel-id')));
     });
   }
 
   function renderStreams() {
-    const filtered = filterByPlatformAndSearch(streamsData, 'channelName');
+    const filtered = filterData(streamsData);
     streamsCountEl.textContent = filtered.length;
 
     streamsGrid.innerHTML = filtered.map(st => `
@@ -326,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderClips() {
-    const filtered = filterByPlatformAndSearch(clipsData, 'title');
+    const filtered = filterData(clipsData);
     clipsCountEl.textContent = filtered.length;
 
     clipsGrid.innerHTML = filtered.map(clip => `
@@ -347,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderChannels() {
-    const filtered = filterByPlatformAndSearch(channelsData);
+    const filtered = filterData(channelsData);
     channelsCountEl.textContent = filtered.length;
 
     channelsGrid.innerHTML = filtered.map(ch => `
@@ -364,10 +423,14 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
 
     channelsGrid.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.getAttribute('data-channel-id');
-        openModal(id);
-      });
+      card.addEventListener('click', () => openModal(card.getAttribute('data-channel-id')));
+    });
+  }
+
+  function filterData(items) {
+    return items.filter(item => {
+      const matchesPlatform = selectedPlatform === 'all' || item.platform === selectedPlatform;
+      return matchesPlatform;
     });
   }
 
@@ -376,7 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const channel = channelsData.find(c => c.id === channelId);
     if (!channel) return;
 
-    activeModalChannel = channel;
     modalAvatar.src = channel.avatar;
     modalPlatform.textContent = channel.platform;
     modalPlatform.style.color = channel.platform === 'twitch' ? 'var(--twitch-color)' : 'var(--youtube-color)';
@@ -396,35 +458,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeModal() {
     counterModal.classList.add('hidden');
-    activeModalChannel = null;
   }
 
-  // --- Real-time Ticker Simulation ---
-  function startLiveTicker() {
-    setInterval(() => {
-      // Pick 2 random channels to update
-      const channelA = channelsData[Math.floor(Math.random() * channelsData.length)];
-      const deltaA = Math.floor(Math.random() * 8) + 1;
-      channelA.count += deltaA;
-
-      // Update card element if present
-      const elA = document.getElementById(`card-counter-${channelA.id}`);
-      if (elA) {
-        elA.textContent = channelA.count.toLocaleString();
-        elA.classList.add('flash');
-        setTimeout(() => elA.classList.remove('flash'), 400);
-      }
-
-      // Update modal if active
-      if (activeModalChannel && activeModalChannel.id === channelA.id) {
-        modalCounterValue.textContent = channelA.count.toLocaleString();
-        modalCounterValue.classList.add('flash');
-        setTimeout(() => modalCounterValue.classList.remove('flash'), 400);
-      }
-
-    }, 2000);
+  function formatNumber(num) {
+    const n = parseInt(num);
+    if (isNaN(n)) return '0';
+    if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return n.toString();
   }
-
-  // Run initialization
-  init();
 });
