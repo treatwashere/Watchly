@@ -1,12 +1,11 @@
 /* =========================================================
-   WATCHLY - COMPLETE DASHBOARD & SOCIAL BLADE THEME
+   WATCHLY - MODERN DARK THEME & RESPONSIVE UI
    ========================================================= */
 
-/* --- 1. CORE RESET & VARIABLES --- */
 :root {
-  --bg-main: #090d16;
-  --bg-card: rgba(22, 27, 34, 0.8);
-  --bg-card-hover: rgba(30, 38, 48, 0.95);
+  --bg-main: #0b0f19;
+  --bg-card: rgba(22, 27, 34, 0.85);
+  --bg-card-hover: rgba(30, 38, 50, 0.95);
   --border-color: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(88, 166, 255, 0.4);
   --text-primary: #f0f6fc;
@@ -27,8 +26,8 @@
 body {
   background-color: var(--bg-main);
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(169, 112, 255, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(255, 78, 78, 0.05) 0%, transparent 40%);
+    radial-gradient(circle at 15% 15%, rgba(169, 112, 255, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(88, 166, 255, 0.06) 0%, transparent 40%);
   color: var(--text-primary);
   font-family: var(--font-family);
   min-height: 100vh;
@@ -36,7 +35,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* CRITICAL: Prevents natural image sizes from exploding layout */
 img {
   max-width: 100%;
   height: auto;
@@ -47,7 +45,7 @@ img {
   display: none !important;
 }
 
-/* --- 2. NAVIGATION BAR --- */
+/* NAVBAR */
 .navbar {
   display: flex;
   align-items: center;
@@ -76,7 +74,6 @@ img {
 .brand-title {
   font-size: 1.3rem;
   font-weight: 800;
-  letter-spacing: -0.5px;
   background: linear-gradient(135deg, #fff 30%, var(--accent-blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -96,7 +93,7 @@ img {
 .search-box {
   position: relative;
   flex: 1;
-  max-width: 480px;
+  max-width: 460px;
 }
 
 .search-icon {
@@ -105,7 +102,6 @@ img {
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-secondary);
-  font-size: 0.9rem;
 }
 
 .search-box input {
@@ -153,7 +149,7 @@ img {
   color: var(--text-primary);
 }
 
-/* --- 3. MAIN CONTENT CONTAINER --- */
+/* MAIN CONTAINER */
 .main-container {
   max-width: 1280px;
   margin: 0 auto;
@@ -179,7 +175,7 @@ img {
   margin: 0 auto;
 }
 
-/* --- 4. CONTROL PILLS & TABS --- */
+/* PILLS & TABS */
 .platform-pills {
   display: flex;
   justify-content: center;
@@ -284,7 +280,7 @@ img {
 
 @keyframes pulse {
   0% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.3; }
   100% { opacity: 1; }
 }
 
@@ -293,20 +289,21 @@ img {
   color: var(--text-secondary);
 }
 
-/* --- 5. RESPONSIVE GRID LAYOUTS --- */
+/* GRID LAYOUTS */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
 }
 
-/* --- 6. CARDS DESIGN --- */
+/* CARDS DESIGN */
 .card {
   background: var(--bg-card);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   overflow: hidden;
+  cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
@@ -318,7 +315,6 @@ img {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* Counter Card Styling */
 .counter-card-inner {
   padding: 1.25rem;
 }
@@ -337,7 +333,7 @@ img {
   flex-shrink: 0;
 }
 
-.avatar-img, .channel-card-avatar {
+.avatar-img {
   width: 52px;
   height: 52px;
   border-radius: 50%;
@@ -370,7 +366,7 @@ img {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  max-width: 170px;
 }
 
 .card-handle {
@@ -382,7 +378,7 @@ img {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  padding: 0.9rem;
+  padding: 1rem;
   text-align: center;
 }
 
@@ -392,7 +388,7 @@ img {
   letter-spacing: 1px;
   color: var(--text-secondary);
   text-transform: uppercase;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.3rem;
 }
 
 .counter-number {
@@ -403,98 +399,7 @@ img {
   letter-spacing: 0.5px;
 }
 
-/* Stream & Clip Thumbnail Cards */
-.card-thumb {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: #161b22;
-  overflow: hidden;
-}
-
-.card-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.badge-live {
-  position: absolute;
-  top: 0.6rem;
-  left: 0.6rem;
-  background: #e50914;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.badge-viewers {
-  position: absolute;
-  bottom: 0.6rem;
-  left: 0.6rem;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-}
-
-.badge-duration {
-  position: absolute;
-  bottom: 0.6rem;
-  right: 0.6rem;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-}
-
-.card-content {
-  padding: 1rem;
-}
-
-.card-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-bottom: 0.4rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.3;
-}
-
-.card-subtext {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.channel-card-body {
-  padding: 1.5rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.channel-card-avatar {
-  width: 72px;
-  height: 72px;
-  margin-bottom: 0.8rem;
-}
-
-/* --- 7. FIXED MODAL & SOCIAL BLADE METRICS --- */
+/* MODAL & SOCIAL BLADE POPUP */
 .modal {
   position: fixed;
   top: 0;
@@ -522,6 +427,29 @@ img {
   color: var(--text-primary);
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
   position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
 }
 
 .modal-header-banner {
