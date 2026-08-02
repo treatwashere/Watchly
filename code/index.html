@@ -1,22 +1,180 @@
-<!doctype html>
+
+  <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Watchly - (BETA)</title>
-<link rel="icon" type="image/png" href="All Logos.png">
-<style>
-/* --- CLEAN DEVICE FRAMING STYLES (NO BROWSER CHROME / NO ADDRESS BAR) --- */
-body {
-margin: 0;
-padding: 40px 20px;
-background: linear-gradient(135deg, #0f172a, #1e293b);
-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-color: #334155;
-display: flex;
-justify-content: center;
-align-items: center;
-min-height: 100vh;
-box-sizing: border-box;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watchly — Live Twitch & YouTube Analytics, Streams & Clips</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="logo">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <span class="brand-title">Watchly</span>
+        <span class="badge-opensource">Open Source</span>
+      </div>
+
+      <!-- Main Search Bar -->
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search Twitch & YouTube channels, live streams, clips..." />
+        <button id="clearSearch" class="clear-btn hidden"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Action / Links -->
+      <div class="nav-actions">
+        <a href="https://github.com" target="_blank" class="github-btn" title="View Source on GitHub">
+          <i class="fa-brands fa-github"></i> GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Platform Banner -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <h1>Real-Time Stream Stats & Live Analytics</h1>
+      <p>Track live follower & sub counts, active streams, viral clips, and channel performance across Twitch and YouTube.</p>
+      
+      <!-- Platform Filters -->
+      <div class="platform-pills">
+        <button class="pill active" data-platform="all">
+          <i class="fa-solid fa-globe"></i> All Platforms
+        </button>
+        <button class="pill twitch" data-platform="twitch">
+          <i class="fa-brands fa-twitch"></i> Twitch
+        </button>
+        <button class="pill youtube" data-platform="youtube">
+          <i class="fa-brands fa-youtube"></i> YouTube
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="main-container">
+
+    <!-- Navigation Tabs -->
+    <nav class="content-tabs">
+      <button class="tab-btn active" data-tab="live-counts">
+        <i class="fa-solid fa-chart-line"></i> Live Counters
+      </button>
+      <button class="tab-btn" data-tab="live-streams">
+        <i class="fa-solid fa-tower-broadcast"></i> Live Streams <span class="badge-count" id="streamsCount">0</span>
+      </button>
+      <button class="tab-btn" data-tab="clips-videos">
+        <i class="fa-solid fa-film"></i> Clips & Videos <span class="badge-count" id="clipsCount">0</span>
+      </button>
+      <button class="tab-btn" data-tab="channels">
+        <i class="fa-solid fa-users"></i> Channels <span class="badge-count" id="channelsCount">0</span>
+      </button>
+    </nav>
+
+    <!-- SECTION 1: LIVE COUNTERS -->
+    <section id="live-counts" class="tab-content active">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-circle-dot live-indicator"></i> Featured Live Counts</h2>
+        <span class="update-pulse"><i class="fa-solid fa-rotate"></i> Syncing live data every 2s</span>
+      </div>
+
+      <div class="counters-grid" id="countersGrid">
+        <!-- Dynamic dynamic live counter cards will be populated here -->
+      </div>
+    </section>
+
+    <!-- SECTION 2: LIVE STREAMS -->
+    <section id="live-streams" class="tab-content">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-tower-broadcast"></i> Currently Live Broadcasts</h2>
+      </div>
+      <div class="streams-grid" id="streamsGrid">
+        <!-- Live streams cards populated here -->
+      </div>
+    </section>
+
+    <!-- SECTION 3: CLIPS & VIDEOS -->
+    <section id="clips-videos" class="tab-content">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-fire"></i> Trending Clips & Recent Videos</h2>
+      </div>
+      <div class="clips-grid" id="clipsGrid">
+        <!-- Clips and videos populated here -->
+      </div>
+    </section>
+
+    <!-- SECTION 4: CHANNELS -->
+    <section id="channels" class="tab-content">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-address-card"></i> Tracked Channels</h2>
+      </div>
+      <div class="channels-grid" id="channelsGrid">
+        <!-- Channel profiles populated here -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Live Counter Full Modal -->
+  <div class="modal-overlay hidden" id="counterModal">
+    <div class="modal-card">
+      <button class="modal-close" id="closeModal"><i class="fa-solid fa-xmark"></i></button>
+      
+      <div class="modal-header">
+        <img id="modalAvatar" src="" alt="Channel Avatar" class="modal-avatar" />
+        <div class="modal-meta">
+          <div class="modal-platform" id="modalPlatform"></div>
+          <h2 id="modalName">Channel Name</h2>
+          <span id="modalHandle" class="handle">@handle</span>
+        </div>
+      </div>
+
+      <div class="modal-counter-box">
+        <span class="counter-label" id="modalCounterLabel">LIVE SUBSCRIBER COUNT</span>
+        <div class="big-counter" id="modalCounterValue">0</div>
+        <div class="counter-status">
+          <span class="pulse-dot"></span> Updates in real-time
+        </div>
+      </div>
+
+      <div class="modal-stats-grid">
+        <div class="stat-item">
+          <span class="stat-title">Total Views</span>
+          <span class="stat-value" id="modalViews">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-title">Status</span>
+          <span class="stat-value" id="modalStatus">Offline</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-title">Platform</span>
+          <span class="stat-value" id="modalPlatformText">YouTube</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <a href="#" id="modalExternalLink" target="_blank" class="primary-btn">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Channel
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>⚡ <strong>Watchly</strong> — Free & Open Source Twitch & YouTube Analytics. Built for creators and fans.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
