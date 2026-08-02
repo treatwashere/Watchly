@@ -1,198 +1,430 @@
 /**
- * Watchly Front-end Application Engine
- * Handles live subscriber simulation, platform switching, and dynamic cards.
+ * Watchly - Frontend Interactive Engine
+ * Handles searching, platform filtering, tab switching, modal updates, 
+ * and live-counter ticking simulations.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Application State
-  const state = {
-    platform: 'twitch', // 'twitch' | 'youtube'
-    channelName: 'kaicenat',
-    followerCount: 10485210,
-    isLive: true,
-    viewers: 74320,
-    intervalId: null
-  };
 
-  // Mock Database for quick demo switching
-  const mockData = {
-    twitch: {
-      name: 'KaiCenat',
-      badge: '<i class="fa-brands fa-twitch"></i> Twitch Partner',
-      badgeClass: 'badge-twitch',
-      metricLabel: 'LIVE FOLLOWER COUNT',
-      count: 10485210,
+  // --- Mock Data ---
+  const channelsData = [
+    {
+      id: 'kaicenat',
+      name: 'Kai Cenat',
+      handle: '@kaicenat',
+      platform: 'twitch',
       avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150',
-      viewers: '74,320',
+      count: 10485210,
+      metricLabel: 'LIVE FOLLOWER COUNT',
       views: '184.2M',
-      subs: '89,410',
+      isLive: true,
       category: 'Just Chatting',
-      btnColor: 'var(--twitch-color)',
-      clips: [
-        { title: 'Craziest Mafia Stream Highlight', views: '1.2M views', duration: '0:59', img: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400' },
-        { title: 'Guest reaction to unexpected caller', views: '840K views', duration: '0:30', img: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400' },
-        { title: 'Subathon day 15 milestone reached!', views: '620K views', duration: '1:15', img: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400' }
-      ]
+      url: 'https://twitch.tv/kaicenat'
     },
-    youtube: {
+    {
+      id: 'mrbeast',
       name: 'MrBeast',
-      badge: '<i class="fa-brands fa-youtube"></i> YouTube Verified',
-      badgeClass: 'badge-youtube',
-      metricLabel: 'LIVE SUBSCRIBER COUNT',
-      count: 310490120,
+      handle: '@MrBeast',
+      platform: 'youtube',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-      viewers: 'N/A (Offline)',
+      count: 310490120,
+      metricLabel: 'LIVE SUBSCRIBER COUNT',
       views: '58.4B',
-      subs: '310.4M',
+      isLive: false,
       category: 'Entertainment',
-      btnColor: 'var(--youtube-color)',
-      clips: [
-        { title: '$1,000,000 Hotel vs $1 Hotel!', views: '85M views', duration: '20:14', img: 'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=400' },
-        { title: '7 Days Stranded At Sea', views: '112M views', duration: '24:02', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400' },
-        { title: 'Surviving 100 Days In Bunker', views: '94M views', duration: '18:45', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400' }
-      ]
+      url: 'https://youtube.com/@MrBeast'
+    },
+    {
+      id: 'xqc',
+      name: 'xQc',
+      handle: '@xqc',
+      platform: 'twitch',
+      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150',
+      count: 11982400,
+      metricLabel: 'LIVE FOLLOWER COUNT',
+      views: '520.1M',
+      isLive: true,
+      category: 'Grand Theft Auto V',
+      url: 'https://twitch.tv/xqc'
+    },
+    {
+      id: 'mkbhd',
+      name: 'Marques Brownlee',
+      handle: '@MKBHD',
+      platform: 'youtube',
+      avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150',
+      count: 18902300,
+      metricLabel: 'LIVE SUBSCRIBER COUNT',
+      views: '4.1B',
+      isLive: false,
+      category: 'Science & Technology',
+      url: 'https://youtube.com/@MKBHD'
+    },
+    {
+      id: 'pokimane',
+      name: 'Pokimane',
+      handle: '@pokimane',
+      platform: 'twitch',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      count: 9340120,
+      metricLabel: 'LIVE FOLLOWER COUNT',
+      views: '210.5M',
+      isLive: true,
+      category: 'VALORANT',
+      url: 'https://twitch.tv/pokimane'
+    },
+    {
+      id: 'pyro',
+      name: 'Lofi Girl',
+      handle: '@LofiGirl',
+      platform: 'youtube',
+      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
+      count: 14200000,
+      metricLabel: 'LIVE SUBSCRIBER COUNT',
+      views: '1.9B',
+      isLive: true,
+      category: 'Music',
+      url: 'https://youtube.com/@LofiGirl'
     }
-  };
+  ];
 
-  // DOM Elements
-  const platformBtns = document.querySelectorAll('.platform-btn');
-  const searchForm = document.getElementById('search-form');
-  const channelInput = document.getElementById('channel-input');
-  
-  const channelNameEl = document.getElementById('channel-name');
-  const channelAvatarEl = document.getElementById('channel-avatar');
-  const platformBadgeEl = document.getElementById('platform-badge');
-  const metricLabelEl = document.getElementById('metric-label');
-  const liveCounterEl = document.getElementById('live-counter-num');
-  
-  const metricViewers = document.getElementById('metric-viewers');
-  const metricViews = document.getElementById('metric-views');
-  const metricSubs = document.getElementById('metric-subs');
-  const metricCategory = document.getElementById('metric-category');
-  
+  const streamsData = [
+    {
+      id: 'stream-1',
+      channelId: 'kaicenat',
+      channelName: 'Kai Cenat',
+      platform: 'twitch',
+      title: 'MAFIA STREAM DAY 3! SPECIAL GUESTS IN THE BUILDING!',
+      viewers: '84,120',
+      game: 'Just Chatting',
+      thumb: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500',
+      url: 'https://twitch.tv/kaicenat'
+    },
+    {
+      id: 'stream-2',
+      channelId: 'xqc',
+      channelName: 'xQc',
+      platform: 'twitch',
+      title: 'JUICER GAMING! RANK 1 RADIANT CLIMB THEN REACTION TIME',
+      viewers: '62,490',
+      game: 'VALORANT',
+      thumb: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500',
+      url: 'https://twitch.tv/xqc'
+    },
+    {
+      id: 'stream-3',
+      channelId: 'pyro',
+      channelName: 'Lofi Girl',
+      platform: 'youtube',
+      title: 'lofi hip hop radio 📚 - beats to relax/study to',
+      viewers: '31,800',
+      game: 'Music',
+      thumb: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500',
+      url: 'https://youtube.com/@LofiGirl'
+    }
+  ];
+
+  const clipsData = [
+    {
+      id: 'clip-1',
+      title: '$1,000,000 Hotel vs $1 Hotel Highlight!',
+      channelName: 'MrBeast',
+      platform: 'youtube',
+      views: '12.4M views',
+      duration: '0:58',
+      thumb: 'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=500',
+      url: 'https://youtube.com/@MrBeast'
+    },
+    {
+      id: 'clip-2',
+      title: 'Unbelievable clutch in final circle!',
+      channelName: 'Pokimane',
+      platform: 'twitch',
+      views: '842K views',
+      duration: '0:30',
+      thumb: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=500',
+      url: 'https://twitch.tv/pokimane'
+    },
+    {
+      id: 'clip-3',
+      title: 'Apple Vision Pro Secret Feature Revealed',
+      channelName: 'Marques Brownlee',
+      platform: 'youtube',
+      views: '3.1M views',
+      duration: '1:45',
+      thumb: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=500',
+      url: 'https://youtube.com/@MKBHD'
+    }
+  ];
+
+  // --- State Variables ---
+  let selectedPlatform = 'all'; // 'all' | 'twitch' | 'youtube'
+  let searchQuery = '';
+  let activeTab = 'live-counts';
+  let activeModalChannel = null;
+
+  // --- DOM Elements ---
+  const searchInput = document.getElementById('searchInput');
+  const clearSearchBtn = document.getElementById('clearSearch');
+  const platformPills = document.querySelectorAll('.platform-pills .pill');
   const tabBtns = document.querySelectorAll('.tab-btn');
-  const tabPanes = document.querySelectorAll('.tab-pane');
-  const clipsGrid = document.getElementById('clips-grid');
-  const videosGrid = document.getElementById('videos-grid');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-  // Initialize
-  init();
+  // Grids
+  const countersGrid = document.getElementById('countersGrid');
+  const streamsGrid = document.getElementById('streamsGrid');
+  const clipsGrid = document.getElementById('clipsGrid');
+  const channelsGrid = document.getElementById('channelsGrid');
 
+  // Counts
+  const streamsCountEl = document.getElementById('streamsCount');
+  const clipsCountEl = document.getElementById('clipsCount');
+  const channelsCountEl = document.getElementById('channelsCount');
+
+  // Modal Elements
+  const counterModal = document.getElementById('counterModal');
+  const closeModalBtn = document.getElementById('closeModal');
+  const modalAvatar = document.getElementById('modalAvatar');
+  const modalPlatform = document.getElementById('modalPlatform');
+  const modalName = document.getElementById('modalName');
+  const modalHandle = document.getElementById('modalHandle');
+  const modalCounterLabel = document.getElementById('modalCounterLabel');
+  const modalCounterValue = document.getElementById('modalCounterValue');
+  const modalViews = document.getElementById('modalViews');
+  const modalStatus = document.getElementById('modalStatus');
+  const modalPlatformText = document.getElementById('modalPlatformText');
+  const modalExternalLink = document.getElementById('modalExternalLink');
+
+  // --- Initialization ---
   function init() {
     setupEventListeners();
-    updateDashboard(mockData[state.platform]);
-    startLiveCounterTicker();
+    renderAllGrids();
+    startLiveTicker();
   }
 
+  // --- Event Listeners ---
   function setupEventListeners() {
-    // Platform Toggle Switcher
-    platformBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        platformBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.platform = btn.getAttribute('data-platform');
-        
-        // Update placeholder input text
-        if (state.platform === 'twitch') {
-          channelInput.placeholder = "Enter Twitch username (e.g. kaicenat)...";
-          channelInput.value = "kaicenat";
-        } else {
-          channelInput.placeholder = "Enter YouTube channel handle (e.g. MrBeast)...";
-          channelInput.value = "mrbeast";
-        }
-
-        updateDashboard(mockData[state.platform]);
+    // Platform Filter Pills
+    platformPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        platformPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        selectedPlatform = pill.getAttribute('data-platform');
+        renderAllGrids();
       });
     });
 
-    // Search Form Submit
-    searchForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const query = channelInput.value.trim();
-      if (!query) return;
-
-      // Simulate search / fetch
-      state.channelName = query;
-      channelNameEl.textContent = query;
-      
-      // Simulate slightly updated baseline count
-      state.followerCount = Math.floor(Math.random() * 500000) + 1000000;
-      renderCounterValue(state.followerCount);
-    });
-
-    // Content Tabs Switcher
+    // Navigation Tabs
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         tabBtns.forEach(b => b.classList.remove('active'));
-        tabPanes.forEach(p => p.classList.remove('active'));
-        
+        tabContents.forEach(c => c.classList.remove('active'));
+
         btn.classList.add('active');
-        const targetTab = btn.getAttribute('data-tab');
-        document.getElementById(`pane-${targetTab}`).classList.add('active');
+        activeTab = btn.getAttribute('data-tab');
+        document.getElementById(activeTab).classList.add('active');
+      });
+    });
+
+    // Search Input
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      clearSearchBtn.classList.toggle('hidden', searchQuery === '');
+      renderAllGrids();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      renderAllGrids();
+    });
+
+    // Modal Close Events
+    closeModalBtn.addEventListener('click', closeModal);
+    counterModal.addEventListener('click', (e) => {
+      if (e.target === counterModal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  }
+
+  // --- Filtering Helpers ---
+  function filterByPlatformAndSearch(items, nameKey = 'name') {
+    return items.filter(item => {
+      const matchesPlatform = selectedPlatform === 'all' || item.platform === selectedPlatform;
+      const matchesSearch = searchQuery === '' || 
+        item[nameKey].toLowerCase().includes(searchQuery) || 
+        (item.handle && item.handle.toLowerCase().includes(searchQuery));
+      return matchesPlatform && matchesSearch;
+    });
+  }
+
+  // --- Render Functions ---
+  function renderAllGrids() {
+    renderCounters();
+    renderStreams();
+    renderClips();
+    renderChannels();
+  }
+
+  function renderCounters() {
+    const filtered = filterByPlatformAndSearch(channelsData);
+    countersGrid.innerHTML = filtered.map(ch => `
+      <div class="card" data-channel-id="${ch.id}">
+        <div class="counter-card-inner">
+          <div class="card-top">
+            <div class="avatar-wrapper">
+              <img src="${ch.avatar}" alt="${ch.name}" class="avatar-img" />
+              <div class="platform-tag ${ch.platform}">
+                <i class="fa-brands fa-${ch.platform}"></i>
+              </div>
+            </div>
+            <div>
+              <div class="card-channel-name">${ch.name}</div>
+              <div class="card-handle">${ch.handle}</div>
+            </div>
+          </div>
+          <div class="counter-value-box">
+            <div class="counter-metric-label">${ch.metricLabel}</div>
+            <div class="counter-number" id="card-counter-${ch.id}">${ch.count.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach Click Event to Counter Cards
+    countersGrid.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-channel-id');
+        openModal(id);
       });
     });
   }
 
-  function updateDashboard(data) {
-    channelNameEl.textContent = data.name;
-    channelAvatarEl.src = data.avatar;
-    platformBadgeEl.innerHTML = data.badge;
-    platformBadgeEl.className = `badge ${data.badgeClass}`;
-    metricLabelEl.textContent = data.metricLabel;
-    
-    metricViewers.textContent = data.viewers;
-    metricViews.textContent = data.views;
-    metricSubs.textContent = data.subs;
-    metricCategory.textContent = data.category;
+  function renderStreams() {
+    const filtered = filterByPlatformAndSearch(streamsData, 'channelName');
+    streamsCountEl.textContent = filtered.length;
 
-    state.followerCount = data.count;
-    renderCounterValue(state.followerCount);
-
-    // Render Clips
-    renderCards(clipsGrid, data.clips);
-    renderCards(videosGrid, data.clips);
-  }
-
-  // Live counter animation ticker simulating real-time socket updates
-  function startLiveCounterTicker() {
-    if (state.intervalId) clearInterval(state.intervalId);
-
-    state.intervalId = setInterval(() => {
-      // Random increment (+1 to +5 followers)
-      const delta = Math.floor(Math.random() * 5) + 1;
-      state.followerCount += delta;
-      
-      renderCounterValue(state.followerCount);
-      flashCounter();
-    }, 2500);
-  }
-
-  function renderCounterValue(val) {
-    liveCounterEl.textContent = val.toLocaleString();
-  }
-
-  function flashCounter() {
-    liveCounterEl.classList.add('flash');
-    setTimeout(() => {
-      liveCounterEl.classList.remove('flash');
-    }, 400);
-  }
-
-  function renderCards(container, items) {
-    container.innerHTML = items.map(item => `
-      <div class="card-item">
+    streamsGrid.innerHTML = filtered.map(st => `
+      <div class="card" onclick="window.open('${st.url}', '_blank')">
         <div class="card-thumb">
-          <img src="${item.img}" alt="${item.title}" />
-          <span class="card-duration">${item.duration}</span>
+          <img src="${st.thumb}" alt="${st.title}" />
+          <span class="badge-live"><i class="fa-solid fa-circle"></i> LIVE</span>
+          <span class="badge-viewers"><i class="fa-solid fa-user"></i> ${st.viewers}</span>
         </div>
-        <div class="card-body">
-          <div class="card-title">${item.title}</div>
-          <div class="card-meta">
-            <span><i class="fa-solid fa-eye"></i> ${item.views}</span>
-            <span>2 days ago</span>
+        <div class="card-content">
+          <div class="card-title">${st.title}</div>
+          <div class="card-subtext">
+            <span>${st.channelName}</span>
+            <span>${st.game}</span>
           </div>
         </div>
       </div>
     `).join('');
   }
+
+  function renderClips() {
+    const filtered = filterByPlatformAndSearch(clipsData, 'title');
+    clipsCountEl.textContent = filtered.length;
+
+    clipsGrid.innerHTML = filtered.map(clip => `
+      <div class="card" onclick="window.open('${clip.url}', '_blank')">
+        <div class="card-thumb">
+          <img src="${clip.thumb}" alt="${clip.title}" />
+          <span class="badge-duration">${clip.duration}</span>
+        </div>
+        <div class="card-content">
+          <div class="card-title">${clip.title}</div>
+          <div class="card-subtext">
+            <span>${clip.channelName}</span>
+            <span>${clip.views}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderChannels() {
+    const filtered = filterByPlatformAndSearch(channelsData);
+    channelsCountEl.textContent = filtered.length;
+
+    channelsGrid.innerHTML = filtered.map(ch => `
+      <div class="card" data-channel-id="${ch.id}">
+        <div class="channel-card-body">
+          <img src="${ch.avatar}" alt="${ch.name}" class="channel-card-avatar" />
+          <div class="card-channel-name">${ch.name}</div>
+          <div class="card-handle" style="margin-bottom: 0.8rem;">${ch.handle}</div>
+          <span class="badge-opensource" style="background: rgba(255,255,255,0.05); color: var(--text-secondary); border-color: var(--border-color)">
+            <i class="fa-brands fa-${ch.platform}"></i> ${ch.platform.toUpperCase()}
+          </span>
+        </div>
+      </div>
+    `).join('');
+
+    channelsGrid.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-channel-id');
+        openModal(id);
+      });
+    });
+  }
+
+  // --- Modal Logic ---
+  function openModal(channelId) {
+    const channel = channelsData.find(c => c.id === channelId);
+    if (!channel) return;
+
+    activeModalChannel = channel;
+    modalAvatar.src = channel.avatar;
+    modalPlatform.textContent = channel.platform;
+    modalPlatform.style.color = channel.platform === 'twitch' ? 'var(--twitch-color)' : 'var(--youtube-color)';
+    modalName.textContent = channel.name;
+    modalHandle.textContent = channel.handle;
+    modalCounterLabel.textContent = channel.metricLabel;
+    modalCounterValue.textContent = channel.count.toLocaleString();
+    modalViews.textContent = channel.views;
+    modalStatus.textContent = channel.isLive ? 'LIVE' : 'Offline';
+    modalStatus.style.color = channel.isLive ? 'var(--accent-green)' : 'var(--text-muted)';
+    modalPlatformText.textContent = channel.platform === 'twitch' ? 'Twitch' : 'YouTube';
+    modalExternalLink.href = channel.url;
+    modalExternalLink.style.backgroundColor = channel.platform === 'twitch' ? 'var(--twitch-color)' : 'var(--youtube-color)';
+
+    counterModal.classList.remove('hidden');
+  }
+
+  function closeModal() {
+    counterModal.classList.add('hidden');
+    activeModalChannel = null;
+  }
+
+  // --- Real-time Ticker Simulation ---
+  function startLiveTicker() {
+    setInterval(() => {
+      // Pick 2 random channels to update
+      const channelA = channelsData[Math.floor(Math.random() * channelsData.length)];
+      const deltaA = Math.floor(Math.random() * 8) + 1;
+      channelA.count += deltaA;
+
+      // Update card element if present
+      const elA = document.getElementById(`card-counter-${channelA.id}`);
+      if (elA) {
+        elA.textContent = channelA.count.toLocaleString();
+        elA.classList.add('flash');
+        setTimeout(() => elA.classList.remove('flash'), 400);
+      }
+
+      // Update modal if active
+      if (activeModalChannel && activeModalChannel.id === channelA.id) {
+        modalCounterValue.textContent = channelA.count.toLocaleString();
+        modalCounterValue.classList.add('flash');
+        setTimeout(() => modalCounterValue.classList.remove('flash'), 400);
+      }
+
+    }, 2000);
+  }
+
+  // Run initialization
+  init();
 });
